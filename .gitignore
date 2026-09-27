@@ -1,0 +1,40 @@
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Application secrets
+backend/app/data/connection_secrets.json
+
+# Local application data
+backend/app/data/connections.json
+
+# RAG persistent data
+rag/chroma_data/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Integration local data
+backend/app/data/integration_secrets.json
+backend/app/data/integrations.json

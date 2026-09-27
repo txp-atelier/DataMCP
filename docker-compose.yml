@@ -1,0 +1,123 @@
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: datamcp_backend
+    environment:
+      DATAMCP_SECRET_KEY: ${DATAMCP_SECRET_KEY}
+      NOTION_CLIENT_ID: ${NOTION_CLIENT_ID}
+      NOTION_CLIENT_SECRET: ${NOTION_CLIENT_SECRET}
+      NOTION_REDIRECT_URI: ${NOTION_REDIRECT_URI}
+      NOTION_AUTH_URL: ${NOTION_AUTH_URL}
+      NOTION_PARENT_PAGE_ID: ${NOTION_PARENT_PAGE_ID}
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - mcp-server
+    networks:
+      - datamcp
+
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    container_name: datamcp_mcp
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    volumes:
+      - ./mcp-server:/app
+    networks:
+      - datamcp
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: datamcp_frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - datamcp
+
+  rag:
+    build:
+      context: ./rag
+    container_name: datamcp_rag
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./rag:/app
+      - rag_chroma_data:/app/chroma_data
+    networks:
+      - datamcp
+      
+  postgres:
+    image: postgres:17
+    container_name: datamcp_postgres
+    environment:
+      POSTGRES_USER: datamcp
+      POSTGRES_PASSWORD: datamcp
+      POSTGRES_DB: datamcp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - datamcp
+
+  mysql:
+    image: mysql:8.4
+    container_name: datamcp_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: datamcp
+      MYSQL_DATABASE: datamcp
+      MYSQL_USER: datamcp
+      MYSQL_PASSWORD: datamcp
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - datamcp
+
+  mongodb:
+      image: mongo:8
+      container_name: datamcp_mongodb
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: datamcp
+        MONGO_INITDB_ROOT_PASSWORD: datamcp
+        MONGO_INITDB_DATABASE: datamcp
+        GLIBC_TUNABLES: glibc.pthread.rseq=1
+      ports:
+        - "27017:27017"
+      volumes:
+        - mongodb_data:/data/db
+      networks:
+        - datamcp
+
+
+volumes:
+  frontend_node_modules:
+  postgres_data:
+  mysql_data:
+  mongodb_data:
+  rag_chroma_data:
+
+networks:
+  datamcp:
+    driver: bridge

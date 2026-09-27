@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg[binary]
+pymysql
+pymongo
+requests
+openai
+groq
+mcp==1.30.0
+cryptography
